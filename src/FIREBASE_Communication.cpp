@@ -7,37 +7,10 @@
 
 
 /******************* Publilc variables ***********************/
-/*
-static const char digicert[] PROGMEM = R"EOF(
------BEGIN CERTIFICATE-----
-MIIDujCCAqKgAwIBAgILBAAAAAABD4Ym5g0wDQYJKoZIhvcNAQEFBQAwTDEgMB4G
-A1UECxMXR2xvYmFsU2lnbiBSb290IENBIC0gUjIxEzARBgNVBAoTCkdsb2JhbFNp
-Z24xEzARBgNVBAMTCkdsb2JhbFNpZ24wHhcNMDYxMjE1MDgwMDAwWhcNMjExMjE1
-MDgwMDAwWjBMMSAwHgYDVQQLExdHbG9iYWxTaWduIFJvb3QgQ0EgLSBSMjETMBEG
-A1UEChMKR2xvYmFsU2lnbjETMBEGA1UEAxMKR2xvYmFsU2lnbjCCASIwDQYJKoZI
-hvcNAQEBBQADggEPADCCAQoCggEBAKbPJA6+Lm8omUVCxKs+IVSbC9N/hHD6ErPL
-v4dfxn+G07IwXNb9rfF73OX4YJYJkhD10FPe+3t+c4isUoh7SqbKSaZeqKeMWhG8
-eoLrvozps6yWJQeXSpkqBy+0Hne/ig+1AnwblrjFuTosvNYSuetZfeLQBoZfXklq
-tTleiDTsvHgMCJiEbKjNS7SgfQx5TfC4LcshytVsW33hoCmEofnTlEnLJGKRILzd
-C9XZzPnqJworc5HGnRusyMvo4KD0L5CLTfuwNhv2GXqF4G3yYROIXJ/gkwpRl4pa
-zq+r1feqCapgvdzZX99yqWATXgAByUr6P6TqBwMhAo6CygPCm48CAwEAAaOBnDCB
-mTAOBgNVHQ8BAf8EBAMCAQYwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUm+IH
-V2ccHsBqBt5ZtJot39wZhi4wNgYDVR0fBC8wLTAroCmgJ4YlaHR0cDovL2NybC5n
-bG9iYWxzaWduLm5ldC9yb290LXIyLmNybDAfBgNVHSMEGDAWgBSb4gdXZxwewGoG
-3lm0mi3f3BmGLjANBgkqhkiG9w0BAQUFAAOCAQEAmYFThxxol4aR7OBKuEQLq4Gs
-J0/WwbgcQ3izDJr86iw8bmEbTUsp9Z8FHSbBuOmDAGJFtqkIk7mpM0sYmsL4h4hO
-291xNBrBVNpGP+DTKqttVCL1OmLNIG+6KYnX3ZHu01yiPqFbQfXf5WRDLenVOavS
-ot+3i9DAgBkcRcAtjOj4LaR0VknFBbVPFd5uRHg5h6h+u/N5GJG79G+dwfCMNYxd
-AfvDbbnvRG15RjF+Cv6pgsH/76tuIMRQyV+dTZsXjAzlAcmgQWpzU/qlULRuJQ/7
-TBj0/VLZjmmx6BEP3ojY+x1J96relc8geMJgEtslQIxq/H5COEBkEveegeGTLg==
------END CERTIFICATE-----
-)EOF";
-*/
 
-// FireBase FingerPrint
-//const uint8_t FingerPrint[] = {0x27 ,0x78 ,0x0c, 0x49, 0xc2, 0xe6, 0x4a, 0x08, 0x20, 0x8e, 0x1b, 0x12, 0x6e, 0x5e, 0x41, 0xd1, 0x69, 0xc3, 0x93, 0x6f};
-// Mega FingerPrint
-const uint8_t FingerPrint[]  = {0x4b, 0xee, 0x08, 0x8b, 0xa5, 0xfc, 0xea, 0xc5, 0x73, 0x17, 0xfe, 0x75, 0x43, 0x82, 0x33, 0xc1 ,0xc3 ,0xc9 ,0xcc ,0x26};
+// Edit this
+const uint8_t FingerPrint[]  = "******************************************";
+
 fs::File file;
 FirebaseData firebaseDataUpdateValue;
 FirebaseData firebaseDataFile;
@@ -115,26 +88,20 @@ bool FireBaseCheckForUpdate ()
   }
   return 0;
 }
-
-/****************** Private Functions ****************/
-
-void setTime(){
-
-  configTime(3 * 3600, 0, "pool.ntp.org", "time.nist.gov");
-  Serial.print("Waiting for NTP time sync: ");
-  time_t now = time(nullptr);
-  while (now < 8 * 3600 * 2) {
-    delay(500);
-    Serial.print(".");
-    now = time(nullptr);
+int32_t GET_STM_CRC()
+{
+  int32_t STMFileCRCVal;
+  String STMFileCRCString;
+  if (Firebase.get(firebaseDataUpdateValue, "/CRC32Val"))
+  {
+    // Get STM CRC
+    STMFileCRCString = firebaseDataUpdateValue.stringData();
   }
-  Serial.println("");
-  struct tm timeinfo;
-  gmtime_r(&now, &timeinfo);
-  Serial.print("Current time: ");
-  Serial.print(asctime(&timeinfo));
+  STMFileCRCVal = atoi(STMFileCRCString.c_str()); 
+  return STMFileCRCVal;
 
 }
+/****************** Private Functions ****************/
 
 void downloadFirmware()
 {
@@ -232,16 +199,4 @@ void updateEEPROM(uint32 address , uint8 value)
 //  Serial.println(EEPROM.read(address));
 }
 
-int32_t GET_STM_CRC()
-{
-  int32_t STMFileCRCVal;
-  String STMFileCRCString;
-  if (Firebase.get(firebaseDataUpdateValue, "/CRC32Val"))
-  {
-    // Get STM CRC
-    STMFileCRCString = firebaseDataUpdateValue.stringData();
-  }
-  STMFileCRCVal = atoi(STMFileCRCString.c_str()); 
-  return STMFileCRCVal;
 
-}
